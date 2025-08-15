@@ -1,12 +1,12 @@
 // Listen for messages from popup
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {  
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log('Content script received message:', request);
     switch (request.action) {
         case 'insertContent':
             insertMarkdownContent(request.content);
             sendResponse({ success: true, message: 'Markdown content inserted successfully' });
             break;
-            
+
         default:
             sendResponse({ success: false, message: 'Unknown action: ' + request.action });
     }
@@ -27,7 +27,7 @@ async function parseMarkdownContent(content) {
 
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
-            
+
             // Handle code blocks
             if (line.trim().startsWith('```')) {
                 if (!inCodeBlock) {
@@ -70,7 +70,7 @@ async function parseMarkdownContent(content) {
                     });
                     currentSection = '';
                 }
-                
+
                 const match = line.trim().match(/^(#{1,6})\s+(.+)$/);
                 if (match) {
                     const level = match[1].length;
@@ -93,7 +93,7 @@ async function parseMarkdownContent(content) {
                     });
                     currentSection = '';
                 }
-                
+
                 const match = line.trim().match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
                 if (match) {
                     sections.push({
@@ -131,14 +131,14 @@ async function parseMarkdownContent(content) {
                     });
                     currentSection = '';
                 }
-                
+
                 // Collect consecutive blockquote lines
                 let blockquoteContent = line.substring(line.indexOf('>') + 1).trim();
                 while (i + 1 < lines.length && lines[i + 1].trim().startsWith('>')) {
                     i++;
                     blockquoteContent += '\n' + lines[i].substring(lines[i].indexOf('>') + 1).trim();
                 }
-                
+
                 sections.push({
                     type: 'quote',
                     content: parseInlineFormatting(blockquoteContent)
@@ -155,17 +155,17 @@ async function parseMarkdownContent(content) {
                     });
                     currentSection = '';
                 }
-                
+
                 // Collect consecutive list items
                 const isOrdered = line.trim().match(/^\d+\.\s/);
                 let listItems = [];
                 listItems.push(parseInlineFormatting(line.trim().replace(/^[-*+]\s|^\d+\.\s/, '')));
-                
+
                 while (i + 1 < lines.length && (lines[i + 1].trim().match(/^[-*+]\s/) || lines[i + 1].trim().match(/^\d+\.\s/))) {
                     i++;
                     listItems.push(parseInlineFormatting(lines[i].trim().replace(/^[-*+]\s|^\d+\.\s/, '')));
                 }
-                
+
                 sections.push({
                     type: 'list',
                     content: listItems,
@@ -222,37 +222,93 @@ function parseInlineFormatting(text) {
     return text;
 }
 
-function getSelectedInput(){
+function getSelectedInput() {
     const element = document.querySelector('.is-selected');
     return element;
 }
 
-function pressEnter(){
+function pressEnter() {
     const selectedInput = getSelectedInput();
     selectedInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true, code: 'Enter', keyCode: 13, which: 13 }));
 }
 
 async function insertMarkdownContent(content) {
-    const parsedContent = await parseMarkdownContent(content);
-    console.log('Parsed content:', parsedContent);
+    const parsed = await parseMarkdownContent(content);
+    console.log('Inserting markdown content:', parsed);
 
-    const selectedInput = getSelectedInput();
-    console.log('Selected input:', selectedInput);
-    if (selectedInput) {
-        // Focus the input first
-        selectedInput.focus();
-
-        // Insert Medium-friendly HTML content
-        //selectedInput.innerHTML = parsedContent;
-        
-        // Trigger input event to notify Medium
-        selectedInput.dispatchEvent(new Event('input', { bubbles: true }));
-        selectedInput.dispatchEvent(new Event('change', { bubbles: true }));
-        
-        console.log('Medium-friendly HTML inserted successfully');
-    } else {
-        console.error('No suitable input element found');
+    for await (const section of parsed) {
+        console.log('Inserting section:', section);
+        const selectedInput = getSelectedInput();
+        await insertText(section.content, selectedInput, 0);
     }
 }
 
 
+function insertText(text, selectedInput, index) {
+    return new Promise((resolve, reject) => {
+        if (index < text.length) {
+            selectedInput.focus();
+            selectedInput.textContent = text.substring(0, index + 1);
+            selectedInput.dispatchEvent(new Event('input', { bubbles: true }));
+            selectedInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            setTimeout(() => {
+                insertText(text, selectedInput, index + 1).then(resolve).catch(reject);
+            }, 2);
+        } else {
+            selectedInput.focus();
+            setCursorToEnd(selectedInput);
+
+            setTimeout(() => {
+                enter(selectedInput);
+                setTimeout(() => {
+                    resolve(true);
+                }, 10);
+            }, 5000);
+        }
+    });
+}
+
+// Helper function to set cursor to the end of contenteditable element
+function setCursorToEnd(element) {
+    element.focus();
+
+    if (typeof window.getSelection != "undefined" && typeof document.createRange != "undefined") {
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        range.collapse(false);
+
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+    } else if (typeof document.body.createTextRange != "undefined") {
+        // Fallback for older browsers
+        const textRange = document.body.createTextRange();
+        textRange.moveToElementText(element);
+        textRange.collapse(false);
+        textRange.select();
+    }
+}
+
+function enter(selectedInput) {
+    const keydown = new KeyboardEvent('keydown', {
+        key: 'Enter',
+        code: 'Enter',
+        keyCode: 13,
+        which: 13,
+        bubbles: true,
+        cancelable: true
+    });
+
+    const keyup = new KeyboardEvent('keyup', {
+        key: 'Enter',
+        code: 'Enter',
+        keyCode: 13,
+        which: 13,
+        bubbles: true,
+        cancelable: true
+    });
+
+    selectedInput.dispatchEvent(keydown);
+    selectedInput.dispatchEvent(keyup);
+}
