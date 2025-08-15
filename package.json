@@ -1,0 +1,28 @@
+{
+  "name": "markdown-to-medium",
+  "version": "1.0.0",
+  "description": "A Chrome extension that converts markdown files to Medium.com articles, specifically designed for the **Medium New Story publication** at https://medium.com/new-story",
+  "main": "content.js",
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JayeshPadhiar/markdown-to-medium.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/JayeshPadhiar/markdown-to-medium/issues"
+  },
+  "homepage": "https://github.com/JayeshPadhiar/markdown-to-medium#readme",
+  "devDependencies": {
+    "@babel/core": "^7.28.3",
+    "@babel/preset-env": "^7.28.3",
+    "babel-loader": "^10.0.0",
+    "webpack": "^5.101.2",
+    "webpack-cli": "^6.0.1"
+  },
+  "dependencies": {
+  }
+}

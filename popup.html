@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown to Medium</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Markdown to Medium</h1>
+        <p>Convert your markdown files to Medium articles</p>
+
+        <button class="upload-button" id="uploadBtn">Upload Markdown File</button>
+
+        <div class="preview-section" id="previewSection">
+            <h3>Preview:</h3>
+            <div id="preview"></div>
+            <button class="convert-button" id="convertBtn">Convert to Medium.com</button>
+        </div>
+
+        <div class="status hidden" id="status"></div>
+    </div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>
