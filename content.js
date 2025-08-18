@@ -37,11 +37,14 @@ async function parseMarkdownContent(content) {
                     const level = match[1].length;
                     const text = removeInlineFormatting(match[2].trim());
 
+                    console.log(level, level === 1 ? 'header' : (level === 2 ? 'subheader' : 'text'));
+
                     sections.push({
-                        type: level === 1 ? 'header' : 'subheader',
+                        type: level === 1 ? 'header' : (level === 2 ? 'subheader' : 'text'),
                         content: [text],
                         level: level
                     });
+                    console.log('sections', sections[sections.length - 1]);
                 }
                 i++;
                 continue;
@@ -232,7 +235,7 @@ async function parseMarkdownContent(content) {
     } catch (error) {
         console.error('Error parsing markdown:', error);
         return [{
-            type: 'subheader',
+            type: 'text',
             content: [content],
             level: 2
         }];
@@ -275,6 +278,9 @@ async function insertMarkdownContent(content) {
 
         // Route to appropriate insert function based on section type
         switch (section.type) {
+            case 'text':
+                await insertText(Array.isArray(section.content) ? section.content.join(' ') : section.content);
+                break;
             case 'header':
                 await insertHeader(section);
                 break;
@@ -379,24 +385,14 @@ async function insertCodeBlock(section) {
         }
 
 
-
-        
-        setTimeout(async () => {         
-            await keyEvent('enter');
-            await setCursorToEnd(document.activeElement);
-            //await keyEvent('backspace');
-            let currentFocus = document.activeElement;
-            //currentFocus.focus();
-
-            setTimeout(async () => {
-                let currentFocus = document.activeElement;
-                currentFocus.focus();
-                console.log('currentFocus', currentFocus);
-                await keyEvent('right_key', currentFocus);
-                //await keyEvent('enter');
-                resolve(true);
-            }, 50);
-        }, 30);
+        await keyEvent('enter');
+        await setCursorToEnd(document.activeElement);
+        let currentFocus = document.activeElement;
+        currentFocus.focus();
+        console.log('currentFocus', currentFocus);
+        await keyEvent('right_key', currentFocus);
+        //await keyEvent('enter');
+        resolve(true);
     });
 }
 
