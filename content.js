@@ -37,10 +37,21 @@ async function parseMarkdownContent(content) {
                     const level = match[1].length;
                     const text = removeInlineFormatting(match[2].trim());
 
-                    console.log(level, level === 1 ? 'header' : (level === 2 ? 'subheader' : 'text'));
+                    // Determine type based on header level
+                    let type;
+                    if (level === 1) {
+                        type = 'header';
+                    } else if ((level >= 2) && (level <= 6)) {
+                        type = 'subheader';
+                    } else {
+                        // Level 3+ headers should be treated as regular text
+                        type = 'text';
+                    }
+
+                    console.log(level, type);
 
                     sections.push({
-                        type: level === 1 ? 'header' : (level === 2 ? 'subheader' : 'text'),
+                        type: type,
                         content: [text],
                         level: level
                     });
@@ -222,9 +233,9 @@ async function parseMarkdownContent(content) {
                 const hasLinks = paragraphLines.some(line => line.includes('http') || line.includes('www.'));
 
                 sections.push({
-                    type: hasLinks ? 'link' : 'subheader',
+                    type: hasLinks ? 'link' : 'text',
                     content: paragraphLines,
-                    level: hasLinks ? undefined : 3
+                    level: hasLinks ? undefined : undefined
                 });
             }
         }
@@ -544,7 +555,7 @@ function keyEvent(keytype, element) {
     return new Promise((resolve, reject) => {
         //const selectedInput = element || document.querySelector('.is-selected');
         setTimeout(() => {
-            const selectedInput = element || document.querySelector('.is-selected');
+            let selectedInput = element || document.querySelector('.is-selected');
 
             const isWindows = navigator.platform.toUpperCase().indexOf('WIN') >= 0;
             const keyConfig = keyMap[keytype][isWindows ? 'windows' : 'mac'];
@@ -580,15 +591,23 @@ function keyEvent(keytype, element) {
                 cancelable: true
             });
 
-            // Ensure the element is focused before sending key events
-            selectedInput.focus();
+            
+            setTimeout(() => {
+                if (!selectedInput) {
+                    selectedInput = element || document.querySelector('.is-selected');
+                }
+                selectedInput = element || document.querySelector('.is-selected');
 
-            selectedInput.dispatchEvent(keydown);
-            selectedInput.dispatchEvent(keyup);
+                // Ensure the element is focused before sending key events
+                selectedInput.focus();
 
-            console.log('keyEvent', keytype);
+                selectedInput.dispatchEvent(keydown);
+                selectedInput.dispatchEvent(keyup);
 
-            resolve(true);
+                console.log('keyEvent', keytype);
+
+                resolve(true);
+            }, 100);
         }, 100);
     });
 }
