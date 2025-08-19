@@ -1,16 +1,14 @@
 # markdown-to-medium
-A Chrome extension that converts markdown files to Medium.com articles using advanced rich text parsing.
+A Chrome extension that converts markdown files to Medium.com articles with intelligent parsing and direct content injection.
 
 ## Installation
 
 ### For Development:
 1. Clone or download this repository
-2. Install dependencies: `npm install`
-3. Build the extension: `npm run build`
-4. Open Chrome and go to `chrome://extensions/`
-5. Enable "Developer mode" in the top right corner
-6. Click "Load unpacked" and select the project folder
-7. The extension should now appear in your Chrome toolbar
+2. Open Chrome and go to `chrome://extensions/`
+3. Enable "Developer mode" in the top right corner
+4. Click "Load unpacked" and select the project folder
+5. The extension should now appear in your Chrome toolbar
 
 ### For Users:
 1. Download the latest release
@@ -21,62 +19,157 @@ A Chrome extension that converts markdown files to Medium.com articles using adv
 
 ## Usage
 
-### Step 1: Navigate to Medium New Story
-1. Go to **https://medium.com/new-story** in your browser
-2. The extension will automatically detect you're on the correct page
+### Step 1: Navigate to Medium
+1. Go to any **Medium.com** page where you can write/edit content
+2. The extension works on any Medium page with an editor
 
 ### Step 2: Use the Extension
 1. Click the extension icon in your Chrome toolbar
-2. The popup will show your current page status:
-   - ✅ **Green**: On Medium write page - ready to insert content
-   - 📖 **Blue**: On Medium new-story page - can navigate to write
-   - ❌ **Red**: Not on the correct Medium page
+2. The simple popup interface will appear with upload and convert options
 
 ### Step 3: Upload and Insert Content
-1. Select a markdown file using "Choose Markdown File"
-2. Preview your content in the popup
-3. **If on new-story page**: Click "Go to Write Page" to navigate to the editor
-4. **If on write page**: Click "Insert into Editor" to add your content
+1. Click "Upload Markdown File" to select your markdown file (.md, .markdown, .txt)
+2. Preview your content in the popup (shows first 300 characters)
+3. Click "Convert to Medium.com" to insert your content directly into the Medium editor
+4. The extension will automatically close and insert your content
 
 ## Features
 
-- ✅ **Rich Text Parsing**: Uses @contentful/rich-text-from-markdown for accurate conversion
-- ✅ **Smart Formatting**: Automatically applies Medium formatting (headings, quotes, code blocks)
-- ✅ **Content Injection**: Direct insertion into Medium's editor
-- ✅ **File Upload**: Support for .md and .markdown files
-- ✅ **Live Preview**: See your content before publishing
-- ✅ **Advanced Markdown Support**: Handles headings, quotes, code blocks, lists, and more
+- ✅ **Custom Markdown Parser**: Built-in intelligent parser that handles complex markdown syntax
+- ✅ **Direct DOM Manipulation**: Injects content directly into Medium's editor using native keyboard shortcuts
+- ✅ **Smart Formatting**: Automatically applies proper Medium formatting for each element type
+- ✅ **File Upload**: Support for .md, .markdown, and .txt files (up to 5MB)
+- ✅ **Live Preview**: See your content in the popup before inserting
+- ✅ **Comprehensive Markdown Support**: 
+  - Headers (H1-H6) with proper Medium formatting
+  - Blockquotes with `>` syntax
+  - Code blocks with syntax highlighting support
+  - Bullet lists (`*`, `-`, `+`) and numbered lists (`1.`, `2.`, etc.)
+  - Tables (converted to readable text format)
+  - Images (converted to links with alt text)
+  - Links with proper text extraction
+  - Horizontal rules
+  - Inline formatting removal (bold, italic, strikethrough, code)
 
 ## How It Works
 
 The extension uses:
-- **@contentful/rich-text-from-markdown**: Professional-grade markdown parsing
-- **Webpack Bundling**: Enables npm package usage in browser extension
-- **Content Scripts** to interact with Medium's page elements
-- **DOM Manipulation** to insert content into Medium's editor
-- **Medium Keyboard Shortcuts**: Automatically applies proper formatting
-- **Real-time Communication** between popup and content script
+- **Custom Markdown Parser**: Built-in parser that analyzes markdown line-by-line and categorizes content types
+- **Chrome Extension APIs**: Content scripts and messaging for seamless browser integration
+- **DOM Manipulation**: Direct interaction with Medium's editor elements using `.is-selected` selectors
+- **Medium Keyboard Shortcuts**: Simulates native Medium keyboard shortcuts (Cmd+Opt+1 for headers, etc.)
+- **Real-time Communication**: Chrome runtime messaging between popup and content script
+- **Content Injection**: Sequential insertion of parsed sections with proper formatting and timing
 
 ## Supported Pages
 
-- ✅ `https://medium.com/new-story/*` (Main publication page)
-- ✅ Medium write/editor pages when accessed from new-story
-- ❌ Other Medium publications (not supported)
+- ✅ **All Medium.com pages** with editor functionality
+- ✅ `https://medium.com/*` (Any Medium domain)
+- ✅ Medium write/editor pages
+- ✅ Medium story creation and editing interfaces
+- ✅ Works across different Medium publications and personal accounts
 
 ## Development Status
 
 **Currently Working:**
-- Rich text markdown parsing with @contentful/rich-text-from-markdown
-- Advanced formatting support (headings, quotes, code blocks, lists)
-- File upload and preview
-- Automatic Medium formatting application
-- Content insertion into Medium editor
-
-**Development Commands:**
-- `npm run build`: Build the extension for production
-- `npm run dev`: Build and watch for changes during development
+- ✅ Custom markdown parsing with comprehensive syntax support
+- ✅ Advanced formatting support (headings, quotes, code blocks, lists, tables, images)
+- ✅ File upload and preview functionality
+- ✅ Automatic Medium formatting application via keyboard shortcuts
+- ✅ Direct content insertion into Medium editor
+- ✅ Cross-platform keyboard shortcut support (macOS/Windows)
+- ✅ Error handling and file validation
 
 **Technical Features:**
-- Uses webpack for bundling npm packages
-- Babel transpilation for browser compatibility
-- Contentful rich text parsing for accurate markdown conversion
+- Pure JavaScript implementation (no build process required)
+- Chrome Extension Manifest V3 compliance
+- Real-time DOM manipulation and content injection
+- Comprehensive markdown syntax support without external dependencies
+
+## Limitations & Known Issues
+
+- **Formatting Timing**: Content insertion happens sequentially with small delays to ensure proper Medium formatting
+- **Large Files**: Maximum file size is 5MB for optimal performance
+- **Complex Tables**: Tables are converted to readable text format rather than maintaining table structure
+- **Nested Lists**: Currently supports single-level lists; deeply nested lists may not render perfectly
+- **Image Embedding**: Images are converted to links with alt text rather than embedded images
+- **Medium-Specific**: Designed specifically for Medium.com and may not work on other platforms
+
+## File Support
+
+- ✅ `.md` files (Markdown)
+- ✅ `.markdown` files (Markdown)
+- ✅ `.txt` files (Plain text with markdown syntax)
+- 📏 Maximum file size: 5MB
+
+## Medium Keyboard Shortcuts Used
+
+The extension automatically applies these Medium keyboard shortcuts during content insertion:
+
+| Element | macOS | Windows | Description |
+|---------|-------|---------|-------------|
+| Header (H1) | `Cmd+Opt+1` | `Ctrl+Alt+1` | Large header |
+| Subheader (H2-H6) | `Cmd+Opt+2` | `Ctrl+Alt+2` | Medium header |
+| Quote | `Cmd+Opt+5` | `Ctrl+Alt+5` | Blockquote formatting |
+| Code Block | `Cmd+Opt+6` | `Ctrl+Alt+6` | Code block with syntax highlighting |
+
+## Example Usage
+
+1. **Create a markdown file** (`example.md`):
+```markdown
+# My Blog Post
+
+This is a **great** article about coding.
+
+## Key Points
+
+> "Programming is the art of telling another human what one wants the computer to do." - Donald Knuth
+
+### Code Example
+
+```javascript
+function hello() {
+    console.log("Hello, Medium!");
+}
+```
+
+## Benefits
+
+- Easy to write
+- Clean formatting  
+- Professional appearance
+```
+
+2. **Load the extension** on any Medium editor page
+3. **Click "Upload Markdown File"** and select your file
+4. **Preview** the content in the popup
+5. **Click "Convert to Medium.com"** to insert formatted content
+
+## Troubleshooting
+
+### Extension Not Working?
+- Ensure you're on a Medium.com page with an editor
+- Refresh the Medium page and try again
+- Check that the extension is enabled in Chrome settings
+
+### Content Not Inserting Properly?
+- Make sure the Medium editor is focused (click in the editor first)
+- Try uploading a smaller file if you're having issues
+- Ensure your markdown syntax is valid
+
+### File Upload Issues?
+- Check file size (must be under 5MB)
+- Ensure file extension is .md, .markdown, or .txt
+- Verify file isn't corrupted or contains unsupported characters
+
+## Contributing
+
+This extension is open source! Feel free to:
+- Report bugs or issues
+- Suggest new features  
+- Submit pull requests
+- Improve documentation
+
+## License
+
+MIT License - see LICENSE file for details.
