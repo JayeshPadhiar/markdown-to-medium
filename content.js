@@ -593,10 +593,9 @@ function keyEvent(keytype, element) {
 
             
             setTimeout(() => {
-                if (!selectedInput) {
+                while (!selectedInput) {
                     selectedInput = element || document.querySelector('.is-selected');
                 }
-                selectedInput = element || document.querySelector('.is-selected');
 
                 // Ensure the element is focused before sending key events
                 selectedInput.focus();
@@ -607,7 +606,7 @@ function keyEvent(keytype, element) {
                 console.log('keyEvent', keytype);
 
                 resolve(true);
-            }, 100);
+            }, 200);
         }, 100);
     });
 }
